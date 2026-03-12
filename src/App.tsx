@@ -28,12 +28,16 @@ export const App: React.FC = () => {
   const [focused, setFocused] = useState(true);
 
   useEffect(() => {
-    if (errorMessage !== '') {
+    if (errorMessage !== ErrorMessage.notError) {
       setHidenError(false);
-      setTimeout(() => {
+      const id = window.setTimeout(() => {
         setHidenError(true);
         setErrorMessage(ErrorMessage.notError);
       }, 3000);
+
+      return () => {
+        clearTimeout(id);
+      };
     } else {
       setHidenError(true);
     }
