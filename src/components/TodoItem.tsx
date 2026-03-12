@@ -36,10 +36,10 @@ export const TodoItem: React.FC<Props> = ({
   const handlePatchTodo = (item: Todo) => {
     setIsLoading(true);
     patchTodo(item)
-      .then(() =>
+      .then(response =>
         updateTodos((currentTodos: Todo[]) =>
           currentTodos.map(todoItem =>
-            todoItem.id === item.id ? item : todoItem,
+            todoItem.id === response.id ? response : todoItem,
           ),
         ),
       )

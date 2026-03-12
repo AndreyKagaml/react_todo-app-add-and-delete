@@ -30,7 +30,10 @@ export const App: React.FC = () => {
   useEffect(() => {
     if (errorMessage !== '') {
       setHidenError(false);
-      setTimeout(() => setHidenError(true), 3000);
+      setTimeout(() => {
+        setHidenError(true);
+        setErrorMessage(ErrorMessage.notError);
+      }, 3000);
     } else {
       setHidenError(true);
     }
@@ -47,13 +50,13 @@ export const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    setCompletedTodos(() => todosFromServer.filter(item => item.completed));
-    setTodosForView(todosFromServer);
-  }, [todosFromServer]);
+    const updatedCompletedTodos = todosFromServer.filter(
+      item => item.completed,
+    );
 
-  useEffect(() => {
+    setCompletedTodos(updatedCompletedTodos);
     if (filterBy === FilterStatus.completed) {
-      setTodosForView(completedTodos);
+      setTodosForView(updatedCompletedTodos);
 
       return;
     }
@@ -65,12 +68,23 @@ export const App: React.FC = () => {
     }
 
     setTodosForView(todosFromServer);
-  }, [filterBy]);
+  }, [todosFromServer, filterBy]);
 
-  const onClearCompleted = () => {
-    Promise.all([completedTodos.map(item => deleteTodo(item.id))]);
-    setTodosFromServer(currentList =>
-      currentList.filter(item => !item.completed),
+  const onClearCompleted = async () => {
+    const promises = completedTodos.map(t => deleteTodo(t.id));
+    const results = await Promise.allSettled(promises);
+    const hasError = results.some(r => r.status === 'rejected');
+
+    if (hasError) {
+      setErrorMessage(ErrorMessage.unableDelete);
+    }
+
+    const succeededIds = results
+      .map((r, i) => (r.status === 'fulfilled' ? completedTodos[i].id : null))
+      .filter(Boolean);
+
+    setTodosFromServer(current =>
+      current.filter(t => !succeededIds.includes(t.id)),
     );
     setFocused(true);
   };
@@ -109,6 +123,7 @@ export const App: React.FC = () => {
             setError={setErrorMessage}
             setTempTodo={setTempTodo}
             focused={focused}
+            setFocused={setFocused}
           />
         </header>
 

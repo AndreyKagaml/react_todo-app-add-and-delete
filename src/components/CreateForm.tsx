@@ -9,6 +9,7 @@ type Props = {
   updateTodos: (todos: Todo[]) => void;
   setTempTodo: (todos: Todo | null) => void;
   focused: boolean;
+  setFocused: (focused: boolean) => void;
 };
 
 export const CreateForm: React.FC<Props> = ({
@@ -17,6 +18,7 @@ export const CreateForm: React.FC<Props> = ({
   updateTodos,
   setTempTodo,
   focused,
+  setFocused,
 }) => {
   const [title, setTitle] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -62,6 +64,7 @@ export const CreateForm: React.FC<Props> = ({
       .finally(() => {
         setIsSaving(false);
         setTempTodo(null);
+        setFocused(true);
       });
   };
 
@@ -89,6 +92,7 @@ export const CreateForm: React.FC<Props> = ({
         //autoFocus={!isSaving}
         value={title}
         onChange={handleTitleChange}
+        onBlur={() => setFocused(false)}
       />
     </form>
   );
